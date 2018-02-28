@@ -33,7 +33,8 @@
 			</table>
 		</form>
 
-<!--
+
+  <!--
   <textarea id="text-val" rows="4">This is initial template</textarea><br/>
 	<input type="button" id="dwn-btn" value="Download dinamically generated text file"/>
 	-->
@@ -77,16 +78,69 @@ function processFormData() {
   var column = document.getElementById('column').value;
   var start = document.getElementById('startNum').value;
   var end = document.getElementById('endNum').value;
-  var emptyNums = document.getElementById('emptyNums').value;
-  
+  var emptyRaw = document.getElementById('emptyNums').value;
+	var reservedRaw = document.getElementsByName('reservedNum');
+	
   if(!isValidData1(row,column,start,end)){
   	alert('座位數量或起始/結束座號輸入錯誤!! 請重新輸入');
   	return;
   }
+  
+	var numList = handleEmptyNums(start, end, emptyRaw.split(','));
+  //for debug
+  alert(numList);
+  
+  var reservedNums = [];
+  for(var i=0; i < reservedRaw.length ; i++){
+  	var tmp = reservedRaw[i].value.split(',');
+  	if(tmp == '')
+  		continue;
+  	
+  	if(!isValidData2(tmp, column, row, numList)){
+  		alert('預選座位資料輸入錯誤!! 請重新輸入');
+  		return;
+  	}else
+  		reservedNums.push(tmp);
+	}
+	
+	//for debug
+	for(var i=0; i < reservedNums.length ; i++){
+		alert(reservedNums[i]);
+	}
+
+  //initial 2d-array for output
 }
 
 function isValidData1(row, column, start, end){
-	 return !(isNaN(row) || isNaN(column) || isNaN(start) || isNaN(end) || row <= 0 || column <= 0 || start <= 0 || end <= start);  	
+	return !(isNaN(row) || isNaN(column) || isNaN(start) || isNaN(end) || row <= 0 || column <= 0 || start <= 0 || end <= start);  	
+}
+
+function isValidData2(nums, column, row, numList){
+	if(nums.length != 3)
+		return false;
+		
+	for(var i=0; i < nums.length ; i++){
+		if(nums[i] == '' || isNaN(nums[i]))
+			return false;
+	}
+	
+	return !(nums[0] <= 0 || nums[1] <=0 || nums[0] > column || nums[1] > row || nums[2] < 0 || (nums[2] != 0 && numList.indexOf(parseInt(nums[2])) == -1))
+}
+
+function handleEmptyNums(start, end, emptyRaw){
+	var numList = new Array(end-start+1);
+	for(var i = start ; i <= end ; i++){
+		numList[i-1] = i;
+	}
+	
+	for(var j = 0; j < emptyRaw.length ; j++){
+		if(!isNaN(emptyRaw[j]) && emptyRaw[j] !== ''){
+			var index = numList.indexOf(parseInt(emptyRaw[j],10));
+			if(index > -1)
+				numList.splice(index, 1);
+		}
+	}
+	return numList;
 }
 
 function download(filename, text) {
@@ -108,7 +162,6 @@ document.getElementById("dwn-btn").addEventListener("click", function(){
     // Generate download of hello.txt file with some content
     var text = document.getElementById("text-val").value;
     var filename = "hello.txt";
-    
     download(filename, text);
 }, false);
             
