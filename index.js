@@ -101,11 +101,19 @@ function processFormData() {
   table.appendChild(tr);
   
   outString = "\uFEFF";
+  for(var m=0; m < column; m++){
+  	if(m < Math.floor(column/2) || m > Math.floor(column/2))
+  		outString = outString.concat(',');
+  	else
+  		outString = outString.concat('黑板');
+  }
+  outString = outString.concat('\n');
+  
   for(var i=0; i < outList.length ; i++){
   	var newTr = document.createElement("tr");
   	for(var j=0; j < outList[i].length ; j++){
 			var td = document.createElement('td');
-			if(outList[i][j] === -1){
+			if(outList[i][j] <= 0){
 				td.innerHTML = "空位";
 				outString = outString.concat("空位");
 			}else{
